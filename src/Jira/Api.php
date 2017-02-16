@@ -28,6 +28,7 @@ namespace chobie\Jira;
 use chobie\Jira\Api\Authentication\AuthenticationInterface;
 use chobie\Jira\Api\Client\ClientInterface;
 use chobie\Jira\Api\Client\CurlClient;
+use chobie\Jira\Api\Exception;
 use chobie\Jira\Api\Result;
 
 class Api
@@ -38,6 +39,11 @@ class Api
 	const REQUEST_DELETE = 'DELETE';
 
 	const AUTOMAP_FIELDS = 0x01;
+
+	const ASSIGNEE_TYPE_PROJECT_DEFAULT = 'PROJECT_DEFAULT';
+    const ASSIGNEE_TYPE_COMPONENT_LEAD = 'COMPONENT_LEAD';
+    const ASSIGNEE_TYPE_PROJECT_LEAD = 'PROJECT_LEAD';
+    const ASSIGNEE_TYPE_UNASSIGNED = 'UNASSIGNED';
 
 	/**
 	 * Endpoint URL.
@@ -867,6 +873,18 @@ class Api
 	{
 		return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/project/%s/components', $project_key), array(), true);
 	}
+
+    /**
+     * @param $projectKey
+     * @param array $values
+     * @throws Exception
+     */
+	public function addComponent($projectKey, array $values) {
+        if(!in_array("name", array_keys($values))) throw new Exception("Component name missing in values parameter.");
+        if(!in_array("description", array_keys($values))) throw new Exception("Component description missing in values parameter.");
+
+        return $this->api(self::REQUEST_POST, '/rest/api/2/component', $values);
+    }
 
 	/**
 	 * Get all issue types with valid status values for a project.
