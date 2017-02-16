@@ -875,13 +875,55 @@ class Api
 	}
 
     /**
-     * @param $projectKey
-     * @param array $values
-     * @throws Exception
+     * Get a component by id.
+     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/component-getComponent
+     *
+     * @param int|string $id Id of the component.
+     * @return array
      */
-	public function addComponent($projectKey, array $values) {
+	public function getComponent($id) {
+	    return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/component/%s', $id), array(), true);
+	}
+
+    /**
+     * Get project component by id or key.
+     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/component-getComponent
+     *
+     * @param int|string $id Id of the component.
+     * @return array
+     */
+    public function getProjectComponent($project_key, $id = null, $key = null) {
+        if(is_null($id) && is_null($key)) throw new Exception("Id or key missing.");
+
+        if(!is_null($id)) {
+            return $this->getComponent($id);
+        } else {
+            $projectComponents = $this->getProjectComponents($project_key);
+
+            foreach ($projectComponents as $component) {
+                if($component["name"] == $key) {
+                    return $component;
+                }
+            }
+
+            return [];
+        }
+        return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/component/%s', $id), array(), true);
+    }
+
+    /**
+     * Add a component to a given project.
+     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/component-createComponent
+     *
+     * @param $projectKey
+     * @param array $values Associative array of the comnponent values. Must at least contain name and description.
+     * @throws Exception If name and description are missing.
+     * @return array
+     */
+	public function addComponent($project_key, array $values) {
         if(!in_array("name", array_keys($values))) throw new Exception("Component name missing in values parameter.");
         if(!in_array("description", array_keys($values))) throw new Exception("Component description missing in values parameter.");
+        $values["project"] = $project_key;
 
         return $this->api(self::REQUEST_POST, '/rest/api/2/component', $values);
     }
