@@ -222,7 +222,7 @@ class Api
 	 */
 	public function editIssue($issue_key, array $params)
 	{
-		return $this->api(self::REQUEST_PUT, sprintf('/rest/api/2/issue/%s', $issue_key), $params);
+		return $this->api(self::REQUEST_PUT, sprintf('/rest/api/2/issue/%s', $issue_key), $params, true);
 	}
 
 	/**
@@ -358,6 +358,18 @@ class Api
 
 		return $this->api(self::REQUEST_GET, '/rest/api/2/issue/createmeta', $data, true);
 	}
+
+    /**
+     * To get all comments from a given issue.
+     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-getComments
+     *
+     * @param string $issueKey
+     * @param array $params Filter your query with : startAt, maxResults, orderBy, expand. Read the documentation for further information.
+     * @return array|Result|false
+     */
+    public function getComments($issueKey, $params) {
+        return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/issue/%s/comment', $issueKey), $params, true);
+    }
 
 	/**
 	 * Add a comment to a ticket.
@@ -863,9 +875,9 @@ class Api
 
 	/**
 	 * Returns project components.
+     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/project-getProjectComponents
 	 *
 	 * @param string $project_key Project key.
-	 *
 	 * @return array
 	 * @since  2.0.0
 	 */
@@ -887,9 +899,11 @@ class Api
 
     /**
      * Get project component by id or key.
-     * @see https://docs.atlassian.com/jira/REST/cloud/#api/2/component-getComponent
      *
-     * @param int|string $id Id of the component.
+     * @param string $project_key
+     * @param int|null Component id. If null, key must not be null too.
+     * @param string|null Component key. If null, id must not be null too.
+     * @throws Exception If id and key are both null.
      * @return array
      */
     public function getProjectComponent($project_key, $id = null, $key = null) {
@@ -908,7 +922,6 @@ class Api
 
             return [];
         }
-        return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/component/%s', $id), array(), true);
     }
 
     /**
@@ -925,7 +938,7 @@ class Api
         if(!in_array("description", array_keys($values))) throw new Exception("Component description missing in values parameter.");
         $values["project"] = $project_key;
 
-        return $this->api(self::REQUEST_POST, '/rest/api/2/component', $values);
+        return $this->api(self::REQUEST_POST, '/rest/api/2/component', $values, true);
     }
 
 	/**
