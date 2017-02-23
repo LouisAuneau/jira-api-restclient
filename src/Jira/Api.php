@@ -212,6 +212,20 @@ class Api
 		return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/issue/%s', $issue_key), array('expand' => $expand));
 	}
 
+    /**
+     *  Returns the meta data for editing issues.
+     *
+     * @param string $issue_key Issue key.
+     * @param array  $params    Params.
+     *
+     * @return array|false result or false
+     */
+    public function getEditMeta($issue_key, array $params)
+    {
+        return $this->api(self::REQUEST_GET, sprintf('/rest/api/2/issue/%s/editmeta', $issue_key), $params, true);
+    }
+
+
 	/**
 	 * Edits the issue.
 	 *
